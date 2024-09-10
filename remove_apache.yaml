@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Package update
+      yum:
+        update_cache: yes
+    - name: Inastall apache in centos server
+      yum:
+        name: httpd
+        state: absent

@@ -1,0 +1,7 @@
+- name: update ubuntu server
+  tags: ubuntu
+  package:
+        #     update_only: yes
+    update_cache: yes
+  changed_when: false
+  when: ansible_distribution == "Ubuntu"

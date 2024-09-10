@@ -1,0 +1,64 @@
+---
+- hosts: demo
+  become: yes
+  tasks:
+
+    - name: update centos server
+      tags: always
+      package:
+
+          update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "CentOS"
+
+    - name: Inastall apache in centos server
+      tags: apache, httpd, CentOS
+      package:
+          name: 
+              - httpd
+          state: latest
+          update_cache: yes
+      when: ansible_distribution == "CentOS"
+    - name: Start Apachi Service in (CentOS)
+      tags: apache, httpd
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: do not permit traffic in default zone on port 80/tcp
+      ansible.posix.firewalld:
+        port: 80/tcp
+        permanent: true
+        state: enabled
+      register: firewalld
+
+    - name: restart firewalld in (CentOS)
+      ansible.builtin.service:
+        name: firewalld
+        state: restarted
+      when: firewalld.changed
+
+    - name: copy file to Server
+      tags: apache, httpd
+      copy:
+        src: default_site.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: 0744
+
+
+- hosts: workstation
+  become: yes
+  tasks:
+
+    - name: update ubuntu server
+      tags: ubuntu
+      package:
+        #     update_only: yes
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "Ubuntu"
+

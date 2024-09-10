@@ -1,0 +1,53 @@
+- name: Inastall apache in centos server
+  tags: apache, httpd, CentOS
+  package:
+    name: 
+      - "{{apache_package}}"
+    state: latest
+    update_cache: yes
+  when: ansible_distribution == "CentOS"
+- name: Start Apachi Service in (CentOS)
+  tags: apache, httpd
+  service:
+    name: "{{apache_service}}"
+    state: started 
+    enabled: yes
+  when: ansible_distribution == "CentOS"
+
+- name: do not permit traffic in default zone on port 80/tcp
+  ansible.posix.firewalld:
+    port: 80/tcp
+    permanent: true
+    state: enabled
+  notify: restart_firewalld
+
+- name: copy file to Server
+  tags: apache, httpd
+  copy:
+    src: default_site.html
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: 0744
+
+
+- name: Start docker nginx project with inline definition
+  community.docker.docker_compose:
+     project_name: testNginx
+     definition:
+       web:
+         image: nginx
+         volumes:
+            - "/root/nginxTest:/usr/share/nginx/html/"
+         ports:
+                - "8292:80"
+  register: output
+
+        #    - name: Show results
+        #      ansible.builtin.debug:
+        #        var: output
+
+        #    - name: Verify that web and db services are running
+        #      ansible.builtin.assert:
+        #        that:
+        #          - "output.services.web.flask_web_1.state.running"

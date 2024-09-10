@@ -1,0 +1,19 @@
+- hosts: demo
+  become: yes
+  tasks:
+    - name: add user to Client Server
+      user:
+        name: tmc
+        group: root
+    - name: add autorized key for tmc
+      authorized_key:
+        user: tmc
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN86jKx2MUQaGQ3hhB9+LQyiZeptGwVr1dHiZroebBVS Ansible"
+        state: present
+    - name: add Root permission
+      copy:
+        src: sudo_tmc
+        dest: /etc/sudoers.d/tmc
+        owner: root
+        group: root
+        mode: 0440
